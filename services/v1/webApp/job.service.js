@@ -1,5 +1,7 @@
 const httpStatus = require('http-status');
-const {jobCategory,jobDetails,jobRequest} = require('../../../models');
+const jobCategory = require('../../../models/jobCategory.model');
+const jobDetails=require('../../../models/jobDetail.model');
+const jobRequest=require('../../../models/jobRequest.model');
 const ApiError = require('../../../utils/ApiError');
 /**
  * jobCategoryExists
@@ -8,16 +10,7 @@ const ApiError = require('../../../utils/ApiError');
  * 
  */
 
-const jobCategoryExists= async(categoryId)=>{
- 
-const jobCategory=await jobCategory.findById({_id:categoryId});
 
-if(!jobCategory){
-    throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
-}
-else
-return jobCategory;
-}
 
 /**
  * saveJobDetails
@@ -26,9 +19,33 @@ return jobCategory;
  * 
  */
 
+const jobCategoryExists= async(categoryId)=>{
+  
+ const jobCategory1=await jobCategory.findById({_id:categoryId});
+ 
+ if(!jobCategory1){
+     throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
+ }
+ else
+ return jobCategory1;
+ }
+
+
 const saveJobDetails= async(jobObject)=>{
-   
- const jobDetailsSaved=await jobDetails.insert(jobObject);
+
+ let startDate1=new Date(jobObject.startDate);
+
+ let endDate1=new Date(jobObject.endDate);
+ 
+ let status=jobObject.status;
+
+ if(['open', 'closed', 'canceled'].indexOf(status)==-1) throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect status');
+
+ jobObject.startDate=startDate1;
+ jobObject.endDate=endDate1;
+ 
+
+ const jobDetailsSaved=await jobDetails.create(jobObject);
 
  if(!jobDetailsSaved) throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect objectId');
 
@@ -37,11 +54,11 @@ const saveJobDetails= async(jobObject)=>{
 
 }
 
-const getJobDetailsById= async(objectId)=> {
- 
-    const jobDetailsExists= await jobDetails.findById({_id:objectId});
+const getJobDetailsById= async(objectId1)=> {
+    
+    const jobDetailsExists= await jobDetails.findById({_id:objectId1});
 
-    if(!jobDetailsExists) throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect objectId');
+    if(!jobDetailsExists) throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
 
     return jobDetailsExists;
 
@@ -50,15 +67,14 @@ const getJobDetailsById= async(objectId)=> {
 
 const updateJobDetails=async(objectId,jobObject) => {
 
-const jobDetails=await getJobDetailsById(objectId);
+const jobDetails1=await getJobDetailsById(objectId);
 
-if (!jobDetails) {
+if (!jobDetails1) {
     throw new ApiError(httpStatus.NOT_FOUND, 'jobDetails not found');
-  }
- 
-  Object.assign(jobDetails, jobObject);
-  await jobDetails.save();
-  return jobDetails;
+  } 
+  Object.assign(jobDetails1, jobObject);
+  await jobDetails1.save();
+  return jobDetails1;
 
 }
 
@@ -77,72 +93,76 @@ if (!jobDetails) {
 }
 
 const createJobCategory=async(body)=>{
-   console.log("run service1")
-const createdJobCategory=await jobCategory.insert(body);
-   console.log("run service2");
+
+const createdJobCategory=await jobCategory.create(body);
+  
 if(!createdJobCategory) throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect objectId');
-console.log("run service3");
+
  return createdJobCategory;;
 
 
 }
 
 const updateJobCategory=async(objectId,jobCategoryBody)=>{
-
-   const jobCategory= await jobCategoryExists(objectId);
-
+  
+   const jobCategory2= await jobCategoryExists(objectId);
+   
    if (!jobCategory) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
   
-  Object.assign(jobCategory, jobCategoryObject);
-  await jobCategory.save();
-  return jobCategory;
+  Object.assign(jobCategory2, jobCategoryBody);
+  await jobCategory2.save();
+  return jobCategory2;
 }
 
 const deleteJobCategory=async(objectId)=>{
 
- const jobCategory=await jobCategoryExists(objectId);
+ const jobCategory1=await jobCategoryExists(objectId);
   
 
- if (!jobCategory) {
+ if (!jobCategory1) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
   
-  await jobCategory.remove();
-  return jobCategory;
+  await jobCategory1.remove();
+  return jobCategory1;
 
 }
 
 const createJobRequest=async(jobRequestObject)=>{
+  
+  if(['pending', 'approved', 'canceled', 'rejected'].indexOf(jobRequestObject.requestStatus) ==-1)throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect status')
 
-  Object.assign(jobRequest, jobRequestObject);
-  await jobRequest.save();
-  return jobRequest;
+  const jobRequest1=await jobRequest.create(jobRequestObject);
+
+  return jobRequest1;
 
 }
 
 
 const updateJobRequest=async(objectId,object)=>{
    
-    const jobRequest=await jobRequest.findById({_id:objectId});
+    const jobRequest1=await jobRequest.findById({_id:objectId});
 
-    if(!jobRequest) throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    if(!jobRequest1) throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
 
-    Object.assign(jobRequest,object);
-    await jobRequest.save();
-    return jobRequest;
+    Object.assign(jobRequest1,object);
+    await jobRequest1.save();
+    return jobRequest1;
 
 }
 
 const deleteJobRequest=async(objectId)=>{
 
-const jobRequest=await jobRequest.findById({_id:objectId});
+const jobRequest1=await jobRequest.findById({_id:objectId});
 
-if(!jobRequest) throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+if(!jobRequest1) throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
 
-await jobRequest.remove();
-return jobRequest;
+await jobRequest1.remove();
+return jobRequest1;
 
 }
+
+
 module.exports={jobCategoryExists,saveJobDetails,getJobDetailsById,updateJobDetails,deleteJobDetails,createJobCategory,updateJobCategory,deleteJobCategory,createJobRequest,updateJobRequest,deleteJobRequest};

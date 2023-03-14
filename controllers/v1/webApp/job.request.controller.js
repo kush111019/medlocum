@@ -1,18 +1,18 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../../../utils/catchAsync');
-const {userService,jobService} = require('../../../services/v1/webApp');
-
+const jobService = require('../../../services/v1/webApp/job.service');
+const userService=require('../../../services/v1/webApp/user.service');
+const utility = require('../../../utils/helpers');
 
 const createJobRequest = catchAsync(async (req, res) => {
 
 
-const {jobId,clientId,candidateId,requestStatus,createdAt,updatedA}=req.body;
+const {clientId,candidateId,jobDetailId,requestStatus}=req.body;
 
 
 let body=req.body;
 
-
-const jobDetails=await jobService.getJobDetailsById(jobId);
+const jobDetails=await jobService.getJobDetailsById(jobDetailId);
 
 
 if(!jobDetails) return res.status(httpStatus.NO_CONTENT).send();
@@ -32,9 +32,14 @@ if(!candidate) return res.status(httpStatus.NO_CONTENT).send();
 
 const createdJobRequest=await jobService.createJobRequest(body);
 
+res.sendJSONResponse({
+    code: httpStatus.OK,
+    status: true,
+    message: utility.getWebAppMessages('authMessage.signupSuccessfully'),
+    data:createdJobRequest
+  });
 
-res.status(httpStatus.CREATED).send({ newJobCategory });
-
+//res.status(httpStatus.CREATED).send({ createdJobRequest});
 
 })
 
@@ -44,25 +49,22 @@ const updateJobRequest=catchAsync(async (req,res)=>{
 const jobRequestId=req.params.jobRequestId;
 
 
-const {jobId,clientId,candidateId,requestStatus,createdAt,updatedAt}=req.body;
+const {clientId,candidateId,jobDetailId,requestStatus}=req.body;
+
+const body=req.body;
 
 
-const jobDetails=await jobService.getJobDetailsById(jobId);
+const jobRequest=await jobService.updateJobRequest(jobRequestId,body);
+
+res.sendJSONResponse({
+    code: httpStatus.OK,
+    status: true,
+    message: utility.getWebAppMessages('authMessage.signupSuccessfully'),
+    data:jobRequest
+  });
 
 
-if(!jobDetails) return res.status(httpStatus.NO_CONTENT).send();
-
-
-const client=await userService.getUserById(clientId);
-
-
-if(!client) return res.status(httpStatus.NO_CONTENT).send();
-
-
-const jobRequest=await jobService.updateJobRequest(jobRequestId);
-
-
-res.status(httpStatus.CREATED).send({jobRequest});
+//res.status(httpStatus.CREATED).send({jobRequest});
 
 
 })
@@ -70,13 +72,20 @@ res.status(httpStatus.CREATED).send({jobRequest});
 const deleteJobRequest=catchAsync(async(req,res)=>{
     
 
-const jobRequestId=req.params.jobRequestId;
+const jobRequestId1=req.params.jobRequestId1;
 
 
-const jobRequest=await jobService.deleteJobRequest(jobRequestId);
+const jobRequest=await jobService.deleteJobRequest(jobRequestId1);
 
 
-res.send({jobRequest});
+res.sendJSONResponse({
+    code: httpStatus.OK,
+    status: true,
+    message: utility.getWebAppMessages('authMessage.signupSuccessfully'),
+    data:jobRequest
+  });
+
+//res.send({jobRequest});
 
 
 })

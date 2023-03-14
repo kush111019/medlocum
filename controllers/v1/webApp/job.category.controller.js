@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../../../utils/catchAsync');
-const {jobService} = require('../../../services/v1/webApp');
+const jobService = require('../../../services/v1/webApp/job.service');
+const utility = require('../../../utils/helpers');
 
 
 const createJobCategory = catchAsync(async (req, res) => {
@@ -23,7 +24,14 @@ const createJobCategory = catchAsync(async (req, res) => {
 
    console.log("hello world2");
 
-   res.status(httpStatus.CREATED).send({ newJobCategory });
+   res.sendJSONResponse({
+      code: httpStatus.OK,
+      status: true,
+      message: utility.getWebAppMessages('authMessage.signupSuccessfully'),
+      data:newJobCategory
+    });
+
+   //res.status(httpStatus.CREATED).send({ newJobCategory });
 
 })
 
@@ -33,11 +41,18 @@ const updateJobCategory=catchAsync(async(req,res) =>{
 
    let body=req.body;
    
-   let objectId=req.params.jobCategoryId;
+   let objectId1=req.params.jobCategoryId;
 
-   const jobCategory=await jobService.updateJobCategory(objectId,body);
+   const jobCategory=await jobService.updateJobCategory(objectId1,body);
 
-   res.status(httpStatus.CREATED).send({jobCategory });
+   res.sendJSONResponse({
+      code: httpStatus.OK,
+      status: true,
+      message: utility.getWebAppMessages('authMessage.signupSuccessfully'),
+      data:jobCategory
+    });
+
+   //res.status(httpStatus.CREATED).send({jobCategory });
 
 })
 
@@ -45,7 +60,14 @@ const deleteJobCategory=catchAsync(async(req,res) =>{
 
 const jobCategory=await jobService.deleteJobCategory(req.params.jobCategoryId);
 
-res.send({jobCategory});
+res.sendJSONResponse({
+   code: httpStatus.OK,
+   status: true,
+   message: utility.getWebAppMessages('authMessage.signupSuccessfully'),
+   data:jobCategory
+ });
+
+//res.send({jobCategory});
 
 })
 
